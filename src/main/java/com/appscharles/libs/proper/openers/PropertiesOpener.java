@@ -39,11 +39,12 @@ public class PropertiesOpener extends AbstractOpener{
     public CryptedProperties open() throws ProperException {
         StrongTextEncryptor textEncryptor = new StrongTextEncryptor();
         textEncryptor.setPassword(this.saltPassword);
-        String propertiesString;
+        CryptedProperties cryptedProperties = new CryptedProperties();
         try {
-            propertiesString = textEncryptor.decrypt(FileReader.read(this.file));
-            CryptedProperties cryptedProperties = new CryptedProperties();
-            cryptedProperties.load(new StringReader(propertiesString));
+            if (this.file.exists()){
+                String propertiesString = textEncryptor.decrypt(FileReader.read(this.file));
+                cryptedProperties.load(new StringReader(propertiesString));
+            }
             return cryptedProperties;
         } catch (IOException e) {
             throw new ProperException(e);
