@@ -14,6 +14,10 @@ import java.util.Properties;
  */
 public class CryptedProperties extends Properties {
 
+    private File file;
+
+    private String saltPassword;
+
     /**
      * Load.
      *
@@ -22,6 +26,8 @@ public class CryptedProperties extends Properties {
      * @throws ProperException the proper exception
      */
     public synchronized void load(File file, String saltPassword) throws ProperException {
+        this.file = file;
+        this.saltPassword = saltPassword;
         IOpener opener = new PropertiesOpener(file, saltPassword);
         CryptedProperties cryptedProperties = opener.open();
         this.clear();
@@ -50,6 +56,24 @@ public class CryptedProperties extends Properties {
      */
     public synchronized Object put(Class aClass, Object key, Object value) {
         return super.put(aClass.getName() + "." + key, value);
+    }
+
+    /**
+     * Put and store object.
+     *
+     * @param aClass the a class
+     * @param key    the key
+     * @param value  the value
+     * @return the object
+     * @throws ProperException the proper exception
+     */
+    public synchronized Object putAndStore(Class aClass, Object key, Object value) throws ProperException {
+        if (this.file == null || this.saltPassword == null){
+            throw new ProperException("Before use this method, must load file properties.");
+        }
+        Object result = super.put(aClass.getName() + "." + key, value);
+        store(this.file, this.saltPassword);
+        return result;
     }
 
     /**
